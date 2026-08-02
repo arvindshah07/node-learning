@@ -1,3 +1,7 @@
+const express=require("express");
+const app=express();
+const userRoutes=require("./server/routes/userRoutes");
+
 const express = require("express");
 
 const app = express();
@@ -71,6 +75,25 @@ app.put("/users/:id",(req,res)=>{
     });
 
 })
+
+app.use((req,res,next)=>{
+ console.log(`${req.method}  ${req.url}`);
+ next();
+})
+
+app.use((req,res,next)=>{
+    const isAdmin = false;
+    if(!isAdmin){
+        return res.status(403).json({"message":"Access Denied"});
+    }
+    next();
+})
+
+
+
+
+
+
 
 app.listen(3000, () => {
     console.log("Server is running on port 3000");
