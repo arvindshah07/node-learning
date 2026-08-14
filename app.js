@@ -1,99 +1,93 @@
-const express=require("express");
-const app=express();
-const userRoutes=require("./server/routes/userRoutes");
-
 const express = require("express");
+const connectDB = require("./server/db");
+const User = require("./server/models/User");
 
 const app = express();
 
 app.use(express.json());
 
-const users = [
-    { id: 1, name: "Arvind", role: "Developer" },
-    { id: 2, name: "Rahul", role: "Tester" },
-    { id: 3, name: "Aman", role: "Manager" }
-];
+connectDB();
 
-app.get("/users/:id", (req, res) => {
-    const id = Number(req.params.id);
-
-    const user = users.find((u) => u.id === id);
-
-    if (!user) {
-        return res.status(404).json({
-            message: "User not found"
+app.post("/users", async (req, res) => {
+    try {
+        const user = await User.create(req.body);
+        res.status(201).json(user);
+    } catch (error) {
+        if(error.name==="ValidationError"){
+            return res.status(400).json({
+                message: error.message
+            });
+        }
+        res.status(500).json({
+            message: "Server error"
         });
     }
-
-    res.json(user);
 });
 
-app.post("/users",(req,res)=>{
-  const {id,name,role}= req.body ;
-  users.push({id,name,role});
-  if(!id || !name || !role){
-    return res.status(400).json({
-        message:"All fields are required"
-    })
-  }
-  res.status(201).json({
-    message:"User added successfully",
-    user:{id,name,role}
-  });
-})
-
-app.delete("/user/:id",(req,res)=>{
-    const id=Number(req.params.id);
-   const index= users.findIndex((user)=>user.id===id);
-
-   if(index===-1){
-    return res.status(404).json({
-        message:"User not found"
-    });
-   }
-   users.splice(index,1);
-
-   res.json({message: "User deleted successfully"});
-});
-
-app.put("/users/:id",(req,res)=>{
-    const id=Number(req.params.id);
-    const {name,role}=req.body ;
-    const user=users.find((user)=>user.id=id);
-    if (!user) {
-        return res.status(404).json({
-            message: "User not found"
+app.get("/users", async (req, res) => {
+    try {
+        const users = await User.find();
+        res.json(users);
+    } catch (error) {
+        res.status(500).json({
+            message: error.message
         });
     }
+});
 
-    user.name = name;
-    user.role = role;
-
-    res.json({
-        message: "User updated successfully",
-        user
-    });
-
-})
-
-app.use((req,res,next)=>{
- console.log(`${req.method}  ${req.url}`);
- next();
-})
-
-app.use((req,res,next)=>{
-    const isAdmin = false;
-    if(!isAdmin){
-        return res.status(403).json({"message":"Access Denied"});
+app.get("/users/:id",async(req,res)=>{
+    try{
+        const user=await User.findById(req.params.id);
+        if(!user){
+            return res.status(404).json({
+                message:"User not found"
+            });
+        }
+        res.json(user);
     }
-    next();
+    catch(error){
+        res.status(500).json({
+            message:error.message
+        });
+    }
 })
 
+app.put("/users/:id", async(req,res)=>{
+    try{
+        const user=await User.findByIdAndUpdate(req.params.id , req.body, {new :true});
+        if(!user){
+            return res.status(404).json({
+                message:"User not found"
+            });
+        }
+        res.json(user);
+    }
+    catch(error){
+        res.status(500).json({
+            message:error.message
+        });
+    }
+});
 
-
-
-
-
+app.delete("/users/:id",async(req,res)=>{
+    try{
+        const user=await User.findByIdAndDelete(req.params.id);
+        if(!user){
+            return res.status(404).json({
+                message:"User not found"
+            });
+        }
+        res.json({
+            message:"User deleted successfully",
+            user
+        });
+    }
+    catch(error){
+        res.status(500).json({
+          message:error.message  
+        });
+    }
+})
 
 app.listen(3000, () => {
     console.log("Server is running on port 3000");
