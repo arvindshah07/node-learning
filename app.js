@@ -45,7 +45,7 @@ app.get("/users/:id",async(req,res)=> {
             message:error.message
         });
     }
-})
+});
 
 app.put("/users/:id", async(req,res)=> {
     try{
@@ -82,7 +82,7 @@ app.delete("/users/:id",async(req,res)=> {
           message:error.message  
         });
     }
-})
+});
 
 // app.use((err,req,res,next)=>{
 //     console.log(err.message);
