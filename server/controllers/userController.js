@@ -1,4 +1,6 @@
+const message = require("../../message");
 const User= require("../models/User");
+const bcrypt=require("bcrypt");
 
 async function getUsers(req,res,next) {
   try{
@@ -52,4 +54,47 @@ async function updateUser(req,res,next){
   }
 }
 
-module.exports={getUsers,createUser,getUserById,updateUser};
+async function deleteUser(req,res,next) {
+  try{
+     const user=await User.findByIdAndDelete(req.params.id);
+     if(!user){
+      return res.status(404).json({
+        message: "User not found"
+      });
+     }
+     res.json({
+      message : "User deleted successfully",
+      user
+     })
+  }
+  catch(error){
+    
+  }
+}
+
+async function loginUser(req,res,next) {
+  try{
+    const {email,password}=req.body ;
+    const user=await User.findOne({email});
+    if(!user){
+      return res.status(401).json({
+        message:"Invalid email or password"
+      });
+      const isMatch=await bcrypt.compare(password,user.password);
+      if(!isMatch){
+        return res.status(401).json({
+          message: "Invalid email or password"
+        });
+      }
+      res.json({
+        message: "Login successful",
+        user
+      });
+    }
+  }
+  catch(error){
+    next(error);
+  }
+}
+
+module.exports={getUsers,createUser,getUserById,updateUser,deleteUser,loginUser};

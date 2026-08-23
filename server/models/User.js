@@ -1,5 +1,5 @@
 const mongoose=require("mongoose");
-
+const bcrypt=require("bcrypt");
 const userSchema=new mongoose.Schema({
   name:{
     type:String,
@@ -7,7 +7,7 @@ const userSchema=new mongoose.Schema({
   },
 email: {
     type: String,
-    required: true,
+    require: true,
     match: /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 },
   role:{
@@ -15,12 +15,22 @@ email: {
     require:true,
     enum:["Developer","Tester","Manager"]
   }
+ ,
+  password:{
+  type: String,
+  require : true,
+  minlength:6
+  }
+
 });
 
-userSchema.pre("save",function(){
-  console.log("About to save:", this.name);
-  this.name=this.name.toLowerCase();
+userSchema.pre("save",async function(){
+  if(!this.isModified("password")){
+    return ;
+  }
+ this.password=await bcrypt.hash(this.password,10);
 });
+
 
 const User=mongoose.model("User",userSchema);
 
