@@ -1,6 +1,7 @@
 const message = require("../../message");
 const User= require("../models/User");
 const bcrypt=require("bcrypt");
+const jwt=require("jsonwebtoken");
 
 async function getUsers(req,res,next) {
   try{
@@ -72,9 +73,7 @@ async function deleteUser(req,res,next) {
   }
 }
 
-async function loginUser(req, res, next) {
-    
-
+async function loginUser(req, res, next) {    
     try {
         const { email, password } = req.body;
 
@@ -96,8 +95,14 @@ async function loginUser(req, res, next) {
             });
         }
 
+        const token=jwt.sign(
+          {userId:user._id},
+          "mysecretkey",
+          {expiresIn:"1h"}
+        )
+
         res.json({
-            message: "Login successful",
+            message: "Login successful",token,
             user: {
                 _id: user._id,
                 name: user.name,
