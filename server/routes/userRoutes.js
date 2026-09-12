@@ -2,6 +2,7 @@ const express=require("express");
 const {getUsers,createUser,getUserById,updateUser,deleteUser,loginUser}=require("../controllers/userController");
 const router=express.Router();
 const protect=require("../middleware/authMiddleware");
+const authorize=require("../middleware/roleMiddleware");
 const User=require("../models/User");
 const message = require("../../message");
 
@@ -31,6 +32,12 @@ router.get("/profile",protect ,async(req,res,next)=>{
     next(error);
   }
 });
+
+router.get("/manager",protect,authorize("Manager"),(req,res)=>{
+  res.json({
+    message:"Welcome Manager"
+  })
+})
 
 router.get("/:id",getUserById);
 router.put("/:id",updateUser);
