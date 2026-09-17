@@ -17,10 +17,7 @@ function protect(req,res,next){
       });
     }
 
-    console.log("Secret exists:", !!process.env.JWT_SECRET);
-    console.log("Secret:", process.env.JWT_SECRET);
-
-    const decoded=jwt.verify(token,"process.env.JWT_SECRET");
+    const decoded=jwt.verify(token,process.env.JWT_SECRET);
     req.userId=decoded.userId;
     req.role=decoded.role ;
     next();

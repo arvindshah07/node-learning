@@ -1,4 +1,3 @@
-
 const message = require("../../message")
 
 function authorize(role){

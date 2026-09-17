@@ -35,9 +35,11 @@ router.get("/profile",protect ,async(req,res,next)=>{
 
 router.get("/manager",protect,authorize("Manager"),(req,res)=>{
   res.json({
-    message:"Welcome Manager"
-  })
-})
+    message:"Welcome Manager",
+    userId:req.userId,
+    role:req.role
+  });
+});
 
 router.get("/:id",getUserById);
 router.put("/:id",updateUser);
